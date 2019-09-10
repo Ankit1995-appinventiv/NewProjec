@@ -16,8 +16,7 @@ const userSchema = mongoose.Schema({
     required: true
   },
   dob: {
-    type: Date,
-    required: true
+    type: Date
   },
   image: {
     type: String
@@ -26,8 +25,7 @@ const userSchema = mongoose.Schema({
   tokens: [
     {
       token: {
-        type: String,
-        required: true
+        type: String
       }
     }
   ]

@@ -45,32 +45,7 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// router.get("/getProfile/:username", verify, async (req, res) => {
-//   try {
-//     let query = await userModel.findOne({ username: req.params.username });
-
-//     if (query) {
-//       const getAge = Math.floor(
-//         (new Date() - new Date(query.dob).getTime()) / 3.15576e10
-//       );
-
-//       return res.json({ username: query.username, age: getAge });
-//     } else return res.send("user not found");
-//   } catch (err) {
-//     res.status(400).send(err);
-//   }
-// });
 router.get("/getProfile/me", verify, async (req, res) => {
-  // console.log("ehy");
-  // try {
-
-  //   let query = await userModel.find({});
-  //   console.log(query);
-  //   if (query) return res.json(query);
-  //   else return res.send("something went wrong");
-  // } catch (err) {
-  //   res.status(400).send(err);
-  // }
   console.log("inside", req.user._id);
   const q = await userModel.findOne({ _id: req.user._id });
   res.send(q);
@@ -78,12 +53,53 @@ router.get("/getProfile/me", verify, async (req, res) => {
 
 router.get("/allProducts", verify, async (req, res) => {
   try {
-    let query = await productModel.find({}).pretty();
-    if (query) return res.json(query);
+    let query = await productModel.find({});
+    if (query) return res.send(query);
     else return res.send("user not found");
   } catch (err) {
     res.status(404).send(err);
   }
+});
+
+router.get("/addOrders/:_id", verify, async (req, res) => {
+  //const queryFind = await productModel.findOne({ _id: req.body.params });
+  try {
+    let updatepro = await userModel.updateOne(
+      { _id: req.user._id },
+      {
+        $set: {
+          orders: req.params._id
+        }
+      }
+    );
+    res.send(updatepro);
+  } catch (err) {
+    res.send(err);
+  }
+});
+
+router.get("/showOrders", verify, async (req, res) => {
+  let query = await userModel.findOne({ _id: req.user._id });
+  let data = await productModel.findOne({ _id: query.orders });
+  res.send(data);
+  //   const a = req.user._id.toString();
+
+  //   let data = await userModel.aggregate([
+  //     {
+  //       $match: { _id: ObjectId(a) },
+  //       $lookup: {
+  //         from: "products",
+  //         localField: "orders",
+  //         foreignField: "_id",
+  //         as: "productDet"
+  //       }
+  //     }
+  //   ]);
+  //   console.log(data);
+  //   res.send(data);
+  // } catch (err) {
+  //   res.send(err);
+  // }
 });
 
 module.exports = router;

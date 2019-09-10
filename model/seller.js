@@ -19,8 +19,7 @@ const sellerSchema = mongoose.Schema({
   tokens: [
     {
       token: {
-        type: String,
-        required: true
+        type: String
       }
     }
   ],

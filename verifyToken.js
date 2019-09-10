@@ -3,7 +3,6 @@ const user1 = require("./model/User");
 
 module.exports = async function(req, res, next) {
   try {
-    console.log("hello");
     const token = req.header("auth-token");
     if (!token) res.status(401).send("user is not authorized");
 
