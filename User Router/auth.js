@@ -47,13 +47,16 @@ router.post("/login", async (req, res) => {
 
 router.get("/getProfile/me", verify, async (req, res) => {
   console.log("inside", req.user._id);
-  const q = await userModel.findOne({ _id: req.user._id });
+  const q = await userModel.findOne(
+    { _id: req.user._id },
+    { password: 0, _id: 0, tokens: 0 }
+  );
   res.send(q);
 });
 
 router.get("/allProducts", verify, async (req, res) => {
   try {
-    let query = await productModel.find({});
+    let query = await productModel.find({}, { seller: 0, _id: 0, __v: 0 });
     if (query) return res.send(query);
     else return res.send("user not found");
   } catch (err) {
@@ -80,7 +83,10 @@ router.get("/addOrders/:_id", verify, async (req, res) => {
 
 router.get("/showOrders", verify, async (req, res) => {
   let query = await userModel.findOne({ _id: req.user._id });
-  let data = await productModel.findOne({ _id: query.orders });
+  let data = await productModel.findOne(
+    { _id: query.orders },
+    { seller: 0, _id: 0, __v: 0 }
+  );
   res.send(data);
   //   const a = req.user._id.toString();
 

@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 const verify = require("../verifyTokenSeller");
 const productModel = require("../model/products");
 const sellerModel = require("../model/seller");
+const mongoose = require("mongoose");
 
 // router.post("/addproduct", (req, res) => {});
 
@@ -41,15 +42,15 @@ router.post("/sellerLogin", async (req, res) => {
 
 router.post("/insertProduct", verify, async (req, res) => {
   try {
-    const seller1 = await sellerModel.findOne({ _id: req.user._id });
+    req.body.seller = req.user._id;
 
-    if (seller1) {
-      req.body.seller = req.user._id;
+    const query = await productModel.create(req.body);
+    await sellerModel.updateOne(
+      { _id: req.user._id },
+      { $push: { products: query._id } }
+    );
 
-      const query = await productModel.create(req.body);
-
-      res.send(query);
-    } else console.log("seller not found");
+    res.send(query);
   } catch (err) {
     res.send(err);
   }
@@ -57,25 +58,26 @@ router.post("/insertProduct", verify, async (req, res) => {
 
 router.delete("/deleteProduct/:_id", verify, async (req, res) => {
   try {
-    //console.log("inseide");
+    console.log("inseide");
     let updateId = req.params._id;
 
-    let data = await productModel.findOne({ _id: updateId });
+    const del = await sellerModel.update(
+      { _id: req.user._id },
+      { $pull: { products: mongoose.Types.ObjectId(updateId) } }
+    );
+    console.log(del);
+    let deletepro = await productModel.deleteOne({ _id: updateId });
+    console.log(deletepro);
 
-    console.log(data.seller[0]);
-    if (data.seller[0] == req.user._id) {
-      let deletepro = await productModel.deleteOne({ _id: updateId });
-      res.status(200).json({
-        message: "successful",
-        data: deletepro
-      });
-    } else {
-      res.status(400).json({
-        message: "permission denied",
-        erorr: "you canot update this product"
-      });
-    }
-  } catch (err) {}
+    console.log("completed");
+    res.status(200).json({
+      message: "successful",
+      data: deletepro
+    });
+  } catch (err) {
+    console.log(err);
+    res.send(err.message);
+  }
 });
 
 router.get("/allSellerProducts", verify, async (req, res) => {
@@ -109,7 +111,11 @@ router.post("/updateProduct/:_id", verify, async (req, res) => {
     let updateId = req.params._id;
 
     let data = await productModel.findOne({ _id: updateId });
-
+    let du = await productModel.findOne(
+      { _id: updateId },
+      { _id: 0, seller: 0 }
+    );
+    console.log(du);
     if (!data) return res.send("data not found");
     if (data.seller[0] == req.user._id) {
       let updatepro = await productModel.updateOne(
@@ -118,7 +124,8 @@ router.post("/updateProduct/:_id", verify, async (req, res) => {
           $set: {
             productname: req.body.productname
           }
-        }
+        },
+        { upsert: true }
       );
 
       res.status(200).json({
