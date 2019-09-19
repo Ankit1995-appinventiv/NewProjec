@@ -34,15 +34,3 @@ const userSchema = mongoose.Schema({
 });
 let userModel = mongoose.model("userSchema", userSchema);
 module.exports = userModel;
-
-// {
-//   "userName": {
-//      "firstName": "Aarti",
-//      "secondName": "Verma"
-//    },
-//    "social": {
-//      "email": "aarti@gmail.com",
-//      "password": "123456"
-//    },
-//    "postCount": 0
-//  }
